@@ -6,8 +6,10 @@ function getBrowserInfo() {
   const deviceMemory = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "Not available";
   const screenWidth = screen.width;
   const screenHeight = screen.height;
-  const touchSupport =
-    "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+  const touchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+  const colorDept = screen.colorDepth;
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const hardwareConcurrency = navigator.hardwareConcurrency;
 
   // Try to extract browser name/version (basic)
   let browserName = "Unknown";
@@ -34,6 +36,9 @@ function getBrowserInfo() {
   addInfo("Device Memory", deviceMemory);
   addInfo("User Agent", userAgent);
   addInfo("Touch Support", touchSupport ? "Yes" : "No");
+  addInfo("Color Depth", colorDept);
+  addInfo("Time Zone", timeZone);
+  addInfo("Hardware Concurrency", hardwareConcurrency);
 }
 
 function addInfo(label, value) {
@@ -42,20 +47,7 @@ function addInfo(label, value) {
   infoList.appendChild(li);
 }
 getBrowserInfo();
-// Location
-if ("geolocation" in navigator) {
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude, longitude } = pos.coords;
-      addInfo("Location", `Lat: ${latitude}, Lon: ${longitude}`);
-    },
-    err => {
-      addInfo("Location", `Permission denied or unavailable`);
-    }
-  );
-} else {
-  addInfo("Location", "Not supported");
-}
+
 
 // Internet speed
 const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -96,7 +88,24 @@ if ('Magnetometer' in window) {
   addInfo("Magnetometer", "Not supported");
 }
 
-// Camera - Mic check
+document.getElementById("info-list").innerHTML += "<br><b>Permission Required from User : Yes </b> <br>";
+
+// Location
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords;
+      addInfo("Location", `Lat: ${latitude}, Lon: ${longitude}`);
+    },
+    err => {
+      addInfo("Location", `Permission denied or unavailable`);
+    }
+  );
+} else {
+  addInfo("Location", "Not supported");
+}
+
+//  Camera - Mic check
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
