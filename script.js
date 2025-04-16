@@ -1,12 +1,48 @@
 const infoList = document.getElementById("info-list");
+function getBrowserInfo() {
+  const userAgent = navigator.userAgent;
+  const platform = navigator.platform;
+  const language = navigator.language;
+  const deviceMemory = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "Not available";
+  const screenWidth = screen.width;
+  const screenHeight = screen.height;
+  const touchSupport =
+    "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
+  // Try to extract browser name/version (basic)
+  let browserName = "Unknown";
+  let browserVersion = "";
+
+  if (/chrome|crios|crmo/i.test(userAgent)) {
+    browserName = "Chrome";
+    browserVersion = userAgent.match(/(chrome|crios)\/(\d+(\.\d+)?)/i)?.[2] || "";
+  } else if (/firefox|fxios/i.test(userAgent)) {
+    browserName = "Firefox";
+    browserVersion = userAgent.match(/firefox\/(\d+(\.\d+)?)/i)?.[1] || "";
+  } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
+    browserName = "Safari";
+    browserVersion = userAgent.match(/version\/(\d+(\.\d+)?)/i)?.[1] || "";
+  } else if (/edg/i.test(userAgent)) {
+    browserName = "Edge";
+    browserVersion = userAgent.match(/edg\/(\d+(\.\d+)?)/i)?.[1] || "";
+  }
+
+  addInfo("Browser", `${browserName} ${browserVersion}`);
+  addInfo("Platform", platform);
+  addInfo("Language", language);
+  addInfo("Screen Resolution", `${screenWidth} x ${screenHeight}`);
+  addInfo("Device Memory", deviceMemory);
+  addInfo("User Agent", userAgent);
+  addInfo("Touch Support", touchSupport ? "Yes" : "No");
+}
 
 function addInfo(label, value) {
   const li = document.createElement("li");
   li.textContent = `${label}: ${value}`;
   infoList.appendChild(li);
 }
-
-// 📍 Location
+getBrowserInfo();
+// Location
 if ("geolocation" in navigator) {
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -21,7 +57,7 @@ if ("geolocation" in navigator) {
   addInfo("Location", "Not supported");
 }
 
-// 🌐 Internet speed
+// Internet speed
 const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 if (conn) {
   addInfo("Internet Downlink", `${conn.downlink} Mbps`);
@@ -30,7 +66,7 @@ if (conn) {
   addInfo("Internet Info", "Not supported");
 }
 
-// 📱 Accelerometer & Gyroscope
+// Accelerometer & Gyroscope
 if (window.DeviceMotionEvent) {
   window.addEventListener("devicemotion", (e) => {
     const acc = e.accelerationIncludingGravity;
@@ -44,7 +80,7 @@ if (window.DeviceMotionEvent) {
   addInfo("Accelerometer", "Not supported");
 }
 
-// 🧭 Magnetometer (Experimental API, only works on HTTPS + newer devices)
+// Magnetometer (Experimental API, only works on HTTPS + newer devices)
 if ('Magnetometer' in window) {
   try {
     const mag = new Magnetometer();
@@ -60,7 +96,7 @@ if ('Magnetometer' in window) {
   addInfo("Magnetometer", "Not supported");
 }
 
-// 📷 Camera / 🎤 Mic check
+// Camera - Mic check
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
